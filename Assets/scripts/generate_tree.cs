@@ -87,7 +87,7 @@ public class generate_tree : MonoBehaviour
     }
 
 
-    List<TreeBranch> sizedLineUp(float tx, float ty, float r, float calmMovement, float craziness, float freq0, float height0, float lines, float discret, float direction, float size)
+    List<TreeBranch> sizedLineUp(float tx, float ty, float tz, float r, float calmMovement, float craziness, float freq0, float height0, float lines, float discret, float direction, float size)
     {
         List<TreeBranch> arr = new List<TreeBranch> { };
         float xMin = 0f;
@@ -96,27 +96,31 @@ public class generate_tree : MonoBehaviour
         for (float t = xMin; t < xMax; t += ht)
         {
             float angle = Mathf.Sin(t * freq0 + r) * (Mathf.Pow(craziness, t)) / calmMovement + direction;
+            float angle2 = Mathf.Cos(t * freq0 + r) * (Mathf.Pow(craziness, t)) / calmMovement + direction;
             // float angle = Mathf.Sin(t*freq0+r)*(craziness**((r)*(Mathf.Sin(t/100)+1)/2))/calmMovement+direction;
             // float angle = t**(t/40)*Mathf.Sin(r/10+calmMovement)+direction;
             float branch = height0 + height0 / 2f * Mathf.Sin(t * 2f * Mathf.PI / 9f + 8f * Mathf.Sin(r / 6f));
-            float newPosX = tx - branch * Mathf.Sin(angle);
+            float newPosX = tx - branch * Mathf.Sin(angle) * Mathf.Sin(angle2);
             float newPosY = ty - branch * Mathf.Cos(angle);
+            float newPosZ = tz - branch * Mathf.Sin(angle) * Mathf.Cos(angle2);
             float preTX = tx;
             float preTY = ty;
+            float preTZ = tz;
             if (t == xMin)
             {
-                arr.Add(new TreeBranch(tx, ty, 0f, size / 20f));
+                arr.Add(new TreeBranch(tx, ty, tz, size / 20f));
             }
-            arr.Add(new TreeBranch(newPosX, newPosY, 0f, size / 20f));
+            arr.Add(new TreeBranch(newPosX, newPosY, newPosZ, size / 20f));
             tx = newPosX;
             ty = newPosY;
+            tz = newPosZ;
         }
         return arr;
     }
 
     float directionFunc(float tx, float ty, float i, float r)
     {
-        return -(Mathf.Pow(tx % ty, 3)) / 10000;
+        return -(Mathf.Pow(tx % ty, 3)) / 10000f;
     }
     float calmMovementFunc(float tx, float ty, float i, float r)
     {
@@ -144,7 +148,7 @@ public class generate_tree : MonoBehaviour
     }
 
 
-    List<List<TreeBranch>> makeATree(float tx, float ty, int qBranch, float baseBrValue)
+    List<List<TreeBranch>> makeATree(float tx, float ty, float tz, int qBranch, float baseBrValue)
     {
         List<List<TreeBranch>> tree = new List<List<TreeBranch>> { };
         float length = 10f;
@@ -167,6 +171,9 @@ public class generate_tree : MonoBehaviour
                 ty = i != 0 ?
                     tree[0][branchSegment].y / 2f + tree[0][branchSegment - 1].y / 2f :
                     ty;
+                tz = i != 0 ?
+                    tree[0][branchSegment].z / 2f + tree[0][branchSegment - 1].z / 2f :
+                    tz;
                 direction = directionFunc(tx, ty, i, r);
                 calmMovement = calmMovementFunc(tx, ty, i, r);
                 craziness = crazinessFunc(tx, ty, i, r);
@@ -175,7 +182,7 @@ public class generate_tree : MonoBehaviour
                 length = lengthFunc(tx, ty, i, r);
                 discret = discretFunc(tx, ty, i, r);
                 lineSize = qBranch / (i + 1);
-                tree.Add(sizedLineUp(tx, ty, r, calmMovement, craziness, freq0, height0, length, discret, direction, lineSize));
+                tree.Add(sizedLineUp(tx, ty, tz, r, calmMovement, craziness, freq0, height0, length, discret, direction, lineSize));
             }
         }
         float curTreeLenght = tree.Count;
@@ -197,6 +204,7 @@ public class generate_tree : MonoBehaviour
                     }
                     tx = tree[i][branchSegment].x / 2f + tree[i][branchSegment - 1].x / 2f;
                     ty = tree[i][branchSegment].y / 2f + tree[i][branchSegment - 1].y / 2f;
+                    tz = tree[i][branchSegment].z / 2f + tree[i][branchSegment - 1].z / 2f;
                     direction = directionFunc(tx, ty, i, r);
                     calmMovement = calmMovementFunc(tx, ty, i, r);
                     craziness = crazinessFunc(tx, ty, i, r);
@@ -205,7 +213,7 @@ public class generate_tree : MonoBehaviour
                     length = lengthFunc(tx, ty, i, r);
                     discret = discretFunc(tx, ty, i, r);
                     lineSize = treeDepth * treeDepth * qBranch / (k + j * curTreeLenght + i * treeDepth + 1f);
-                    tree.Add(sizedLineUp(tx, ty, r, calmMovement, craziness, freq0, height0, length, discret, direction, lineSize));
+                    tree.Add(sizedLineUp(tx, ty, tz, r, calmMovement, craziness, freq0, height0, length, discret, direction, lineSize));
                 }
             }
         }
@@ -213,7 +221,7 @@ public class generate_tree : MonoBehaviour
         return tree;
     }
 
-    void drawLineUpPos(List<TreeBranch> coords, float x, float y, float r, float lineSize, float scr)
+    void drawLineUpPos(List<TreeBranch> coords, float x, float y, float z, float r, float lineSize, float scr)
     {
         float lineWidth = 1f;
         for (var i = 1; i < coords.Count; i += 1)
@@ -226,27 +234,28 @@ public class generate_tree : MonoBehaviour
             {
                 lineWidth = lineSize / 50f * coords.Count / (i) / 10f;
             }
-            Vector3 branchStart = new Vector3(scr * coords[i - 1].x + x, scr * coords[i - 1].y + y, 0.0f);
-            Vector3 branchEnd = new Vector3(scr * coords[i].x + x, scr * coords[i].y + y, 0.0f);
+            Vector3 branchStart = new Vector3(scr * coords[i - 1].x + x, scr * coords[i - 1].y + y, scr * coords[i - 1].z + z);
+            Vector3 branchEnd = new Vector3(scr * coords[i].x + x, scr * coords[i].y + y, scr * coords[i].z + z);
             float branchPointsDistance = Vector3.Distance(branchStart, branchEnd);
             Vector3 branchSize = new Vector3(lineWidth, lineWidth, branchPointsDistance);
 
             cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube1.transform.localScale = branchSize;
-            cube1.transform.position = new Vector3(branchStart.x - lineWidth, branchStart.y - branchPointsDistance / 2f, branchStart.z);
+            cube1.transform.position = branchStart;
             cube1.transform.LookAt(branchEnd);
-            cube1.GetComponent<Renderer>().material.color = Color.red;
+            cube1.transform.position = new Vector3((branchEnd.x + branchStart.x) / 2f ,(branchEnd.y + branchStart.y) / 2f, (branchEnd.z + branchStart.z) / 2f);
+            cube1.GetComponent<Renderer>().material.color = Color.black;
         }
     }
 
-    void drawTree(List<List<TreeBranch>> b, float x, float y)
+    void drawTree(List<List<TreeBranch>> b, float x, float y, float z)
     {
         float scr = -1f;
         float lineSize = 0.1f;
         for (int i = 0; i < b.Count; i++)
         {
             lineSize = Mathf.Sqrt(-i + b.Count) * 1.5f;
-            drawLineUpPos(b[i], x, y, 0f, lineSize, scr);
+            drawLineUpPos(b[i], x, y, z, 0f, lineSize, scr);
         }
     }
 
@@ -266,8 +275,8 @@ public class generate_tree : MonoBehaviour
         // cube2.GetComponent<Renderer>().material.color = Color.green;
         // cube2.name = "World";
 
-        List<List<TreeBranch>> b = makeATree(0f, -1f, 10, 0.3f);
-        drawTree(b,0f,0f);
+        List<List<TreeBranch>> b = makeATree(0f, 0.1f, 0f, 3, 0.3f);
+        drawTree(b,0f,0f, 0f);
 
         
         // float lineWidth = 0.5f;
@@ -277,14 +286,24 @@ public class generate_tree : MonoBehaviour
         // Vector3 branchSize = new Vector3(lineWidth, lineWidth, branchPointsDistance);
 
         // cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        // cube1.AddComponent<RectTransform>();
+        // cube1.GetComponent<RectTransform>().pivot = new Vector3(0.5f,0f,0.5f); 
         // cube1.transform.localScale = branchSize;
+        // // we want bottom of cube be the point of position, center of the body, start of the branch
         // cube1.transform.position = branchStart;
-        // cube1.transform.LookAt(branchEnd);
+        // // cube1.transform.position =  new Vector3(branchStart.x, branchStart.y + branchPointsDistance / 2f, branchStart.z);
+        // cube1.GetComponent<RectTransform>().LookAt(branchEnd);
+        // cube1.transform.position =  new Vector3((branchEnd.x + branchStart.x) / 2f, branchStart.y + branchPointsDistance / 2f, branchStart.z);
         // cube1.GetComponent<Renderer>().material.color = Color.red;
 
         // cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // cube2.transform.position = new Vector3(branchStart.x - lineWidth, branchStart.y - branchPointsDistance / 2f, branchStart.z);
+        // cube2.transform.position = branchStart;
         // cube2.GetComponent<Renderer>().material.color = Color.green;
+
+        
+        // cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        // cube2.transform.position = branchEnd;
+        // cube2.GetComponent<Renderer>().material.color = Color.blue;
 
     }
 
