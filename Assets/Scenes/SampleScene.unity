@@ -373,8 +373,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eea0ec27da0983e4291668784d85daaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  areaSize: {x: 100, y: 100}
-  buidlingMinSize: 30
+  areaSize: {x: 25, y: 25}
+  buidlingMinHeight: 5
+  floors: 10
+  cellsPerRow: 10
 --- !u!4 &570179832
 Transform:
   m_ObjectHideFlags: 0
