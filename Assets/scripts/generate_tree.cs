@@ -19,73 +19,7 @@ class TreeBranch
 
 public class generate_tree : MonoBehaviour
 {
-
-    public float xAngle, yAngle, zAngle;
     private GameObject cube1, cube2;
-
-    Vector3[] GenerateCubeVertices(Vector3 scale = default(Vector3), float stretch = 0f)
-    {
-        return new Vector3[] {
-            
-            // top
-            new Vector3(-1 * scale.x, 0 * scale.y, 1 * scale.z),
-            new Vector3(1 * scale.x, 0 * scale.y, 1 * scale.z),
-            new Vector3(1 * scale.x, 0 * scale.y, -1 * scale.z),
-            new Vector3(-1 * scale.x, 0 * scale.y, -1 * scale.z),
-            
-            // bottom
-            new Vector3((-1 - stretch) * scale.x, 2 * scale.y, (1 + stretch) * scale.z),
-            new Vector3((1 + stretch) * scale.x, 2 * scale.y, (1 + stretch) * scale.z),
-            new Vector3((1 + stretch) * scale.x, 2 * scale.y, (-1 - stretch) * scale.z),
-            new Vector3((-1 - stretch) * scale.x, 2 * scale.y, (-1 - stretch) * scale.z),
-
-            //  left
-            new Vector3(-1 * scale.x, 0 * scale.y, 1 * scale.z),
-            new Vector3(-1 * scale.x, 0 * scale.y, -1 * scale.z),
-            new Vector3((-1 - stretch) * scale.x, 2 * scale.y, (1 + stretch) * scale.z),
-            new Vector3((-1 - stretch) * scale.x, 2 * scale.y, (-1 - stretch) * scale.z),
-
-            // right
-            new Vector3(1 * scale.x, 0 * scale.y, 1 * scale.z),
-            new Vector3(1 * scale.x, 0 * scale.y, -1 * scale.z),
-            new Vector3((1 + stretch) * scale.x, 2 * scale.y, (1 + stretch) * scale.z),
-            new Vector3((1 - stretch) * scale.x, 2 * scale.y, (-1 - stretch) * scale.z),
-
-            // front
-            new Vector3(1 * scale.x, 0 * scale.y, -1 * scale.z),
-            new Vector3(-1 * scale.x, 0 * scale.y, -1 * scale.z),
-            new Vector3((1 + stretch) * scale.x, 2 * scale.y, (-1 - stretch) * scale.z),
-            new Vector3((-1 - stretch) * scale.x, 2 * scale.y, (-1 - stretch) * scale.z),
-            
-            // back 
-            new Vector3(-1 * scale.x, 0 * scale.y, 1 * scale.z),
-            new Vector3(1 * scale.x, 0 * scale.y, 1 * scale.z),
-            new Vector3((-1 - stretch) * scale.x, 2 * scale.y, (1 + stretch) * scale.z),
-            new Vector3((1 + stretch) * scale.x, 2 * scale.y, (1 + stretch) * scale.z)
-        };
-    }
-
-
-    int[] GenerateCubeTriangles()
-    {
-        return new int[] {
-            1, 0, 2,
-            2, 0, 3,
-            4, 5, 6,
-            4, 6, 7,
-
-            9,10,11,
-            8,10,9,
-            12,13,15,
-            14,12,15,
-
-            16,17,19,
-            18,16,19,
-            20,21,23,
-            22,20,23
-        };
-    }
-
 
     List<TreeBranch> sizedLineUp(float tx, float ty, float tz, float r, float calmMovement, float craziness, float freq0, float height0, float lines, float discret, float direction, float size)
     {
@@ -103,9 +37,6 @@ public class generate_tree : MonoBehaviour
             float newPosX = tx - branch * Mathf.Sin(angle) * Mathf.Sin(angle2);
             float newPosY = ty - branch * Mathf.Cos(angle);
             float newPosZ = tz - branch * Mathf.Sin(angle) * Mathf.Cos(angle2);
-            float preTX = tx;
-            float preTY = ty;
-            float preTZ = tz;
             if (t == xMin)
             {
                 arr.Add(new TreeBranch(tx, ty, tz, size / 20f));
@@ -240,6 +171,7 @@ public class generate_tree : MonoBehaviour
             Vector3 branchSize = new Vector3(lineWidth, lineWidth, branchPointsDistance);
 
             cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube1.transform.parent = gameObject.transform;
             cube1.transform.localScale = branchSize;
             cube1.transform.position = branchStart;
             cube1.transform.LookAt(branchEnd);
@@ -262,48 +194,8 @@ public class generate_tree : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Hello world!");
-
-        // Mesh stuff = new Mesh();
-        // gameObject.AddComponent<MeshFilter>().mesh = stuff;
-        // stuff.vertices = GenerateCubeVertices(new Vector3(1f,2f,1f));
-        // stuff.triangles = GenerateCubeTriangles();
-
-        // cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // cube2.transform.position = new Vector3(-0.75f, 0.0f, 0.0f);
-        // cube2.transform.Rotate(90.0f, 0.0f, 0.0f, Space.World);
-        // cube2.GetComponent<Renderer>().material.color = Color.green;
-        // cube2.name = "World";
-
         List<List<TreeBranch>> b = makeATree(0f, 0.1f, 0f, 3, 0.3f);
-        drawTree(b,0f,0f, 0f);
-
-        
-        // float lineWidth = 0.5f;
-        // Vector3 branchStart = new Vector3(0f, 0f, 0.0f);
-        // Vector3 branchEnd = new Vector3(4f, 5f, 0.0f);
-        // float branchPointsDistance = Vector3.Distance(branchStart, branchEnd);
-        // Vector3 branchSize = new Vector3(lineWidth, lineWidth, branchPointsDistance);
-
-        // cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // cube1.AddComponent<RectTransform>();
-        // cube1.GetComponent<RectTransform>().pivot = new Vector3(0.5f,0f,0.5f); 
-        // cube1.transform.localScale = branchSize;
-        // // we want bottom of cube be the point of position, center of the body, start of the branch
-        // cube1.transform.position = branchStart;
-        // // cube1.transform.position =  new Vector3(branchStart.x, branchStart.y + branchPointsDistance / 2f, branchStart.z);
-        // cube1.GetComponent<RectTransform>().LookAt(branchEnd);
-        // cube1.transform.position =  new Vector3((branchEnd.x + branchStart.x) / 2f, branchStart.y + branchPointsDistance / 2f, branchStart.z);
-        // cube1.GetComponent<Renderer>().material.color = Color.red;
-
-        // cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // cube2.transform.position = branchStart;
-        // cube2.GetComponent<Renderer>().material.color = Color.green;
-
-        
-        // cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // cube2.transform.position = branchEnd;
-        // cube2.GetComponent<Renderer>().material.color = Color.blue;
+        drawTree(b,gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z);
 
     }
 
