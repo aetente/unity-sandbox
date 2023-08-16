@@ -23,7 +23,6 @@ class BuildingPart
 
 public class generate_building : MonoBehaviour
 {
-  private GameObject cube1, cube2;
   public Vector2 areaSize = new Vector2(50f, 50f);
   public float buidlingMinHeight = 5f;
   public int floors = 5;
@@ -107,27 +106,41 @@ public class generate_building : MonoBehaviour
             }
             else
             {
-              cube1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-              cube1.transform.parent = gameObject.transform;
+              GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+              cube.transform.parent = gameObject.transform;
 
-              cube1.transform.localScale = new Vector3(buildingFloors[floor][i][j].width, buidlingMinHeight, buildingFloors[floor][i][j].length);
-              cube1.transform.position = new Vector3(
+              cube.transform.localScale = new Vector3(buildingFloors[floor][i][j].width, buidlingMinHeight, buildingFloors[floor][i][j].length);
+              cube.transform.position = new Vector3(
                 buildingFloors[floor][i][j].x + buildingFloors[floor][i][j].width / 2f,
                 buidlingMinHeight / 2f * (2 * floor + 1),
                 buildingFloors[floor][i][j].y + buildingFloors[floor][i][j].length / 2f
               );
-              cube1.GetComponent<Renderer>().material.color = Color.white;
+              cube.GetComponent<Renderer>().material.color = Color.white;
+
               int textureIndex = (int)Mathf.Round(Random.value * (texuresAmount - 1));
               m_MainTexture = Resources.Load<Texture2D>("generated_building/wall/brick_wall" + textureIndex);
-              cube1.GetComponent<Renderer>().material.SetTexture("_MainTex", m_MainTexture);
-              cube1.GetComponent<Renderer>().material.SetFloat("_Mode", 3);
-              cube1.GetComponent<Renderer>().material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-              cube1.GetComponent<Renderer>().material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-              cube1.GetComponent<Renderer>().material.SetInt("_ZWrite", 0);
-              cube1.GetComponent<Renderer>().material.DisableKeyword("_ALPHATEST_ON");
-              cube1.GetComponent<Renderer>().material.DisableKeyword("_ALPHABLEND_ON");
-              cube1.GetComponent<Renderer>().material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-              cube1.GetComponent<Renderer>().material.renderQueue = 3000;
+
+              cube.GetComponent<Renderer>().material.SetTexture("_MainTex", m_MainTexture);
+              cube.GetComponent<Renderer>().material.SetFloat("_Mode", 3);
+              cube.GetComponent<Renderer>().material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+              cube.GetComponent<Renderer>().material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+              cube.GetComponent<Renderer>().material.SetInt("_ZWrite", 1);
+              cube.GetComponent<Renderer>().material.DisableKeyword("_ALPHATEST_ON");
+              cube.GetComponent<Renderer>().material.DisableKeyword("_ALPHABLEND_ON");
+              cube.GetComponent<Renderer>().material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+              cube.GetComponent<Renderer>().material.renderQueue = 3000;
+
+              
+              GameObject roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
+              roof.transform.parent = gameObject.transform;
+
+              roof.transform.localScale = new Vector3(buildingFloors[floor][i][j].width + 0.5f, 0.5f, buildingFloors[floor][i][j].length + 0.5f);
+              roof.transform.position = new Vector3(
+                buildingFloors[floor][i][j].x + buildingFloors[floor][i][j].width / 2f,
+                buidlingMinHeight * (floor + 1),
+                buildingFloors[floor][i][j].y + buildingFloors[floor][i][j].length / 2f
+              );
+              roof.GetComponent<Renderer>().material.color = Color.white;
 
             }
           }
