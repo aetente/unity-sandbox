@@ -108,6 +108,7 @@ public class generate_building : MonoBehaviour
             {
               GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
               cube.transform.parent = gameObject.transform;
+              cube.GetComponent<Renderer>().material.shader = Shader.Find("Shader Graphs/wall_shader");
 
               cube.transform.localScale = new Vector3(buildingFloors[floor][i][j].width, buidlingMinHeight, buildingFloors[floor][i][j].length);
               cube.transform.position = new Vector3(
